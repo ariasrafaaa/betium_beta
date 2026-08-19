@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fortuna LATAM — Beta Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0E1420;
+    --surface: #161F30;
+    --surface-2: #1D273B;
+    --border: #263352;
+    --blue: #2AABEE;
+    --blue-dim: #1C7FB0;
+    --gold: #E8B44C;
+    --gold-dim: #B8862F;
+    --red: #E2574C;
+    --text: #EDF1F7;
+    --text-dim: #8A96AA;
+    --text-faint: #566079;
+    --display: 'Space Grotesk', sans-serif;
+    --body: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background: radial-gradient(ellipse at top, #131b2c 0%, #0a0e17 70%);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    font-family:var(--body);
+    color:var(--text);
+    padding:24px 12px;
+  }
+  .phone{
+    width:100%;
+    max-width:420px;
+    background:var(--bg);
+    border-radius:28px;
+    border:1px solid var(--border);
+    overflow:hidden;
+    box-shadow: 0 40px 80px -30px rgba(0,0,0,0.7);
+    display:flex;
+    flex-direction:column;
+    min-height:820px;
+    position:relative;
+  }
+
+  /* ---- DEMO BANNER ---- */
+  .demo-banner{
+    background: repeating-linear-gradient(135deg, #3a2a12, #3a2a12 10px, #2e2109 10px, #2e2109 20px);
+    color: var(--gold);
+    font-family: var(--mono);
+    font-size:11px;
+    letter-spacing:0.06em;
+    text-align:center;
+    padding:6px 8px;
+    border-bottom:1px solid var(--gold-dim);
+    text-transform:uppercase;
+  }
+
+  /* ---- TOP BAR (Telegram style) ---- */
+  .topbar{
+    display:flex; align-items:center; gap:10px;
+    padding:14px 16px;
+    border-bottom:1px solid var(--border);
+    background:var(--bg);
+  }
+  .topbar .avatar{
+    width:34px; height:34px; border-radius:50%;
+    background:linear-gradient(135deg, var(--blue), var(--blue-dim));
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--display); font-weight:700; font-size:14px;
+  }
+  .topbar .info{flex:1;}
+  .topbar .info .name{font-family:var(--display); font-weight:600; font-size:14.5px;}
+  .topbar .info .handle{font-size:11.5px; color:var(--text-dim);}
+  .badge-connected{
+    font-size:10px; font-family:var(--mono); color:#6FCF97;
+    display:flex; align-items:center; gap:4px;
+  }
+  .badge-connected::before{content:''; width:6px; height:6px; border-radius:50%; background:#6FCF97; display:inline-block;}
+
+  /* ---- CONTENT ---- */
+  .content{flex:1; overflow-y:auto; padding:18px 16px 90px;}
+
+  .balance-card{
+    background: linear-gradient(160deg, var(--surface-2) 0%, var(--surface) 100%);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:20px;
+    position:relative;
+    overflow:hidden;
+  }
+  .balance-card::after{
+    content:'';
+    position:absolute; top:-40px; right:-40px;
+    width:140px; height:140px; border-radius:50%;
+    background: radial-gradient(circle, rgba(42,171,238,0.18), transparent 70%);
+  }
+  .balance-label{font-size:11.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.06em;}
+  .balance-amount{
+    font-family:var(--mono); font-weight:700; font-size:32px;
+    margin:6px 0 2px; display:flex; align-items:baseline; gap:6px;
+  }
+  .balance-amount span{font-size:15px; color:var(--gold); font-weight:600;}
+  .balance-fiat{font-size:12.5px; color:var(--text-faint);}
+  .balance-actions{display:flex; gap:10px; margin-top:16px;}
+  .btn{
+    flex:1; border:none; border-radius:12px; padding:11px 10px;
+    font-family:var(--body); font-weight:600; font-size:13.5px;
+    cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px;
+    transition:transform .15s ease, opacity .15s ease;
+  }
+  .btn:active{transform:scale(0.96);}
+  .btn-primary{background:var(--blue); color:#fff;}
+  .btn-secondary{background:var(--surface-2); color:var(--text); border:1px solid var(--border);}
+  .btn small{font-size:9px; font-family:var(--mono); color:rgba(255,255,255,0.65); font-weight:400;}
+  .btn-secondary small{color:var(--text-faint);}
+
+  .section-title{
+    font-family:var(--display); font-weight:600; font-size:15px;
+    margin:26px 0 12px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .section-title .tag{
+    font-family:var(--mono); font-size:9.5px; color:var(--text-faint);
+    border:1px solid var(--border); padding:2px 6px; border-radius:6px;
+  }
+
+  .games-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .game-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:16px;
+    padding:14px; cursor:pointer; transition:border-color .15s ease;
+  }
+  .game-card:active{border-color:var(--blue-dim);}
+  .game-icon{font-size:26px; margin-bottom:8px;}
+  .game-name{font-family:var(--display); font-weight:600; font-size:13.5px;}
+  .game-sub{font-size:10.5px; color:var(--text-dim); margin-top:2px;}
+
+  /* Ticket-stub transaction rows — signature element */
+  .ticket{
+    display:flex; align-items:center; gap:12px;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:14px; padding:13px 14px; margin-bottom:9px;
+    position:relative;
+  }
+  .ticket::before, .ticket::after{
+    content:''; position:absolute; top:50%; transform:translateY(-50%);
+    width:14px; height:14px; border-radius:50%; background:var(--bg);
+    border:1px solid var(--border);
+  }
+  .ticket::before{left:-7px;}
+  .ticket::after{right:-7px;}
+  .ticket .dots{
+    width:1px; align-self:stretch; border-left:2px dashed var(--border); margin:0 2px;
+  }
+  .t-icon{
+    width:34px; height:34px; border-radius:10px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:15px;
+  }
+  .t-icon.in{background:rgba(111,207,151,0.14); color:#6FCF97;}
+  .t-icon.out{background:rgba(226,87,76,0.14); color:var(--red);}
+  .t-icon.game{background:rgba(232,180,76,0.14); color:var(--gold);}
+  .t-body{flex:1;}
+  .t-title{font-size:13px; font-weight:600;}
+  .t-time{font-size:10.5px; color:var(--text-faint); margin-top:1px;}
+  .t-amount{font-family:var(--mono); font-weight:700; font-size:13.5px;}
+  .t-amount.pos{color:#6FCF97;}
+  .t-amount.neg{color:var(--red);}
+  .t-status{font-size:9px; font-family:var(--mono); color:var(--text-faint); margin-top:2px; text-align:right;}
+
+  /* Integration point marker */
+  .api-dot{
+    position:absolute; top:-6px; right:-6px;
+    background:var(--gold); color:#1a1204;
+    font-size:8.5px; font-family:var(--mono); font-weight:700;
+    padding:2px 5px; border-radius:6px;
+    box-shadow:0 0 0 3px var(--bg);
+  }
+  .relative{position:relative;}
+
+  /* ---- BOTTOM NAV ---- */
+  .bottomnav{
+    position:absolute; bottom:0; left:0; right:0;
+    display:flex; background:var(--bg); border-top:1px solid var(--border);
+    padding:10px 6px 14px;
+  }
+  .navitem{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+    font-size:10px; color:var(--text-faint); cursor:pointer;
+  }
+  .navitem.active{color:var(--blue);}
+  .navitem .icon{font-size:18px;}
+
+  /* ---- FLOATING DEV BUTTON ---- */
+  .dev-fab{
+    position:fixed; bottom:28px; right:calc(50% - 190px);
+    background:var(--gold); color:#1a1204; border:none;
+    font-family:var(--mono); font-weight:700; font-size:11px;
+    padding:10px 14px; border-radius:30px; cursor:pointer;
+    box-shadow:0 10px 24px -8px rgba(232,180,76,0.5);
+    z-index:50;
+  }
+  @media (max-width:460px){ .dev-fab{right:20px;} }
+
+  /* ---- MODAL ---- */
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(4,7,13,0.75);
+    z-index:100; align-items:center; justify-content:center; padding:20px;
+    backdrop-filter:blur(3px);
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--surface); border:1px solid var(--border); border-radius:20px;
+    max-width:420px; width:100%; max-height:80vh; overflow-y:auto; padding:22px;
+  }
+  .modal h3{font-family:var(--display); font-size:17px; margin-bottom:4px;}
+  .modal .modal-sub{font-size:12px; color:var(--text-dim); margin-bottom:18px;}
+  .integration-item{
+    border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:10px;
+  }
+  .integration-item .ii-head{display:flex; align-items:center; gap:8px; margin-bottom:5px;}
+  .integration-item .ii-num{
+    font-family:var(--mono); font-size:10px; background:var(--surface-2);
+    color:var(--gold); padding:2px 6px; border-radius:5px; border:1px solid var(--border);
+  }
+  .integration-item .ii-title{font-weight:600; font-size:13px; font-family:var(--display);}
+  .integration-item .ii-desc{font-size:11.5px; color:var(--text-dim); line-height:1.5;}
+  .integration-item .ii-file{
+    font-family:var(--mono); font-size:10px; color:var(--blue); margin-top:6px; display:block;
+  }
+  .modal-close{
+    width:100%; margin-top:6px; padding:11px; border-radius:12px; border:none;
+    background:var(--surface-2); color:var(--text); font-weight:600; cursor:pointer;
+  }
+
+  .toast{
+    position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--surface-2); border:1px solid var(--border); color:var(--text);
+    padding:10px 16px; border-radius:12px; font-size:12.5px; z-index:200;
+    opacity:0; transition:opacity .25s ease, transform .25s ease; pointer-events:none;
+    max-width:340px; text-align:center;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="demo-banner">⚠ Modo demo — sin conexión a APIs reales — datos simulados</div>
+
+  <div class="topbar">
+    <div class="avatar">JP</div>
+    <div class="info">
+      <div class="name">Juan Pérez</div>
+      <div class="handle">@juanp_lat</div>
+    </div>
+    <div class="badge-connected">Telegram</div>
+  </div>
+
+  <div class="content">
+
+    <div class="balance-card relative">
+      <div class="api-dot">API #2</div>
+      <div class="balance-label">Saldo disponible</div>
+      <div class="balance-amount">1,248.50<span>USDT</span></div>
+      <div class="balance-fiat">≈ $1,248.50 USD · datos de ejemplo</div>
+      <div class="balance-actions">
+        <button class="btn btn-primary" onclick="showToast('Depósito — aquí se conecta la pasarela de pagos crypto')">
+          ⬇ Depositar
+          <small>gateway crypto</small>
+        </button>
+        <button class="btn btn-secondary" onclick="showToast('Retiro — aquí se conecta la pasarela de pagos crypto')">
+          ⬆ Retirar
+          <small>gateway crypto</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="section-title">
+      Juegos
+      <span class="tag">API #3</span>
+    </div>
+    <div class="games-grid">
+      <div class="game-card" onclick="showToast('Aquí se conecta el proveedor de juego / motor RNG')">
+        <div class="game-icon">🎰</div>
+        <div class="game-name">Tragamonedas</div>
+        <div class="game-sub">12 variantes</div>
+      </div>
+      <div class="game-card" onclick="showToast('Aquí se conecta el proveedor de juego / motor RNG')">
+        <div class="game-icon">🎡</div>
+        <div class="game-name">Ruleta</div>
+        <div class="game-sub">en vivo</div>
+      </div>
+      <div class="game-card" onclick="showToast('Aquí se conecta el proveedor de juego / motor RNG')">
+        <div class="game-icon">🃏</div>
+        <div class="game-name">Blackjack</div>
+        <div class="game-sub">mesa clásica</div>
+      </div>
+      <div class="game-card" onclick="showToast('Aquí se conecta el proveedor de juego / motor RNG')">
+        <div class="game-icon">🎲</div>
+        <div class="game-name">Dados</div>
+        <div class="game-sub">rápido</div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      Actividad reciente
+      <span class="tag">API #2 / #4</span>
+    </div>
+
+    <div class="ticket">
+      <div class="t-icon in">⬇</div>
+      <div class="t-body">
+        <div class="t-title">Depósito confirmado</div>
+        <div class="t-time">Hoy · 14:32</div>
+      </div>
+      <div>
+        <div class="t-amount pos">+250.00</div>
+        <div class="t-status">confirmado</div>
+      </div>
+    </div>
+
+    <div class="ticket">
+      <div class="t-icon game">🎲</div>
+      <div class="t-body">
+        <div class="t-title">Apuesta — Dados</div>
+        <div class="t-time">Hoy · 13:10</div>
+      </div>
+      <div>
+        <div class="t-amount neg">-40.00</div>
+        <div class="t-status">jugado</div>
+      </div>
+    </div>
+
+    <div class="ticket">
+      <div class="t-icon in">🏆</div>
+      <div class="t-body">
+        <div class="t-title">Premio — Tragamonedas</div>
+        <div class="t-time">Ayer · 21:47</div>
+      </div>
+      <div>
+        <div class="t-amount pos">+118.00</div>
+        <div class="t-status">acreditado</div>
+      </div>
+    </div>
+
+    <div class="ticket">
+      <div class="t-icon out">⬆</div>
+      <div class="t-body">
+        <div class="t-title">Retiro solicitado</div>
+        <div class="t-time">Ayer · 18:05</div>
+      </div>
+      <div>
+        <div class="t-amount neg">-300.00</div>
+        <div class="t-status">pendiente</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottomnav">
+    <div class="navitem active"><div class="icon">🏠</div>Inicio</div>
+    <div class="navitem" onclick="showToast('Aquí se conecta el proveedor de juego / motor RNG')"><div class="icon">🎮</div>Juegos</div>
+    <div class="navitem" onclick="showToast('Aquí se conecta la pasarela de pagos crypto')"><div class="icon">💳</div>Billetera</div>
+    <div class="navitem" onclick="showToast('Aquí se conecta el proveedor KYC/AML')"><div class="icon">👤</div>Perfil</div>
+  </div>
+</div>
+
+<button class="dev-fab" onclick="openModal()">🔌 Ver guía de integración</button>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Puntos de integración de API</h3>
+    <div class="modal-sub">Esta beta usa datos simulados. Así se conectarían las APIs reales para producción:</div>
+
+    <div class="integration-item">
+      <div class="ii-head"><span class="ii-num">API #1</span><span class="ii-title">Autenticación Telegram</span></div>
+      <div class="ii-desc">Validar el <b>initData</b> que Telegram envía al abrir la Mini App (firma HMAC con el token del bot) para confirmar la identidad del usuario sin pedir login manual.</div>
+      <span class="ii-file">→ backend/auth/validateInitData.js</span>
+    </div>
+
+    <div class="integration-item">
+      <div class="ii-head"><span class="ii-num">API #2</span><span class="ii-title">Pasarela de pagos crypto</span></div>
+      <div class="ii-desc">Depósitos, retiros y saldo real vía proveedor de wallet crypto (custodial o no-custodial). Reemplaza el saldo simulado y los botones "Depositar / Retirar".</div>
+      <span class="ii-file">→ backend/payments/cryptoGateway.js</span>
+    </div>
+
+    <div class="integration-item">
+      <div class="ii-head"><span class="ii-num">API #3</span><span class="ii-title">Proveedor de juegos</span></div>
+      <div class="ii-desc">Motor de juego / RNG certificado que procesa apuestas y resultados. Sustituye las tarjetas de juego mock por el iframe o SDK del proveedor.</div>
+      <span class="ii-file">→ backend/games/gameProvider.js</span>
+    </div>
+
+    <div class="integration-item">
+      <div class="ii-head"><span class="ii-num">API #4</span><span class="ii-title">KYC / AML</span></div>
+      <div class="ii-desc">Verificación de identidad y monitoreo de transacciones según la jurisdicción con licencia. Se activa en el flujo de registro y antes de retiros grandes.</div>
+      <span class="ii-file">→ backend/compliance/kycProvider.js</span>
+    </div>
+
+    <div class="integration-item">
+      <div class="ii-head"><span class="ii-num">API #5</span><span class="ii-title">Notificaciones (Bot API)</span></div>
+      <div class="ii-desc">El bot de Telegram envía mensajes push al usuario: depósito confirmado, premio ganado, retiro procesado. Usa el token del bot vía Bot API.</div>
+      <span class="ii-file">→ backend/bot/notifications.js</span>
+    </div>
+
+    <button class="modal-close" onclick="closeModal()">Cerrar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function openModal(){ document.getElementById('modalOverlay').classList.add('open'); }
+  function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); }
+  document.getElementById('modalOverlay').addEventListener('click', function(e){
+    if(e.target === this) closeModal();
+  });
+
+  let toastTimer;
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = '🔌 ' + msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=> t.classList.remove('show'), 2600);
+  }
+</script>
+
+</body>
+</html>
